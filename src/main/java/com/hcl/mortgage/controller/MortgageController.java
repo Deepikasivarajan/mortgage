@@ -27,6 +27,7 @@ public class MortgageController {
 	public ResponseEntity<MortgageResponseDTO> createMortgage(@RequestBody MortgageRequestDTO mortgageRequestDTO) {
 		LOGGER.info("inside mortgage");
 		MortgageResponseDTO mortgageResponseDTO = mortgageService.createMortgage(mortgageRequestDTO);
-		return new ResponseEntity<MortgageResponseDTO>(mortgageResponseDTO, HttpStatus.CREATED);
+		return new ResponseEntity<>(mortgageResponseDTO, HttpStatus.CREATED);
 	}
+	
 }

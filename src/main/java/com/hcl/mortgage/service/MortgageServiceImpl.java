@@ -19,7 +19,11 @@ import com.hcl.mortgage.dto.MortgageResponseDTO;
 import com.hcl.mortgage.entity.Account;
 import com.hcl.mortgage.entity.Customer;
 import com.hcl.mortgage.entity.Mortgage;
+import com.hcl.mortgage.exception.InvalidEmailException;
+import com.hcl.mortgage.exception.InvalidFirstName;
+import com.hcl.mortgage.exception.InvalidMiddleName;
 import com.hcl.mortgage.exception.InvalidPhoneNumberException;
+import com.hcl.mortgage.exception.InvalidSurName;
 import com.hcl.mortgage.exception.PropertyCostException;
 import com.hcl.mortgage.exception.RestrictedAgeException;
 import com.hcl.mortgage.repository.AccountRepository;
@@ -49,17 +53,29 @@ public class MortgageServiceImpl implements MortgageService {
 
 		String birthDay = mortgageRequestDTO.getDateOfBirth();
 		LocalDate dob = LocalDate.parse(birthDay, formatter);
-		if (!validateLetters(mortgageRequestDTO.getFirstName())) {
-			System.out.println("dsfksdhf");
-			//throw new InvalidFirstName();
+
+		if (!validateFirstName(mortgageRequestDTO.getFirstName())) {
+			throw new InvalidFirstName();
 		}
-		
+
+		if (!validateMiddleName(mortgageRequestDTO.getMiddleName())) {
+			throw new InvalidMiddleName();
+		}
+
+		if (!validateSurName(mortgageRequestDTO.getSurName())) {
+			throw new InvalidSurName();
+		}
+
 		if (!validAge(dob)) {
 			throw new RestrictedAgeException();
 		}
 
 		if (!validPhoneNumber(mortgageRequestDTO.getPhoneNumber())) {
 			throw new InvalidPhoneNumberException();
+		}
+		
+		if(!validEmail(mortgageRequestDTO.getEmail())) {
+			throw new InvalidEmailException();
 		}
 		Customer customer = new Customer();
 		customer.setLoginId(mortgageRequestDTO.getFirstName() + "25");
@@ -103,9 +119,30 @@ public class MortgageServiceImpl implements MortgageService {
 
 	}
 
+	private boolean validateFirstName(String firstName) {
+		String name = ("^[a-zA-Z]*$");
+		return firstName.matches(name);
+	}
+
+	private boolean validateMiddleName(String middleName) {
+		String name = ("^[a-zA-Z]*$");
+		return middleName.matches(name);
+	}
+
+	private boolean validateSurName(String surName) {
+		String name = ("^[a-zA-Z]*$");
+		return surName.matches(name);
+	}
+	
+	private boolean validEmail(String email) {
+		Pattern p = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
+		Matcher m = p.matcher(email);
+		return (m.find() && m.group().equals(email));
+	}
+	
 	private boolean validPhoneNumber(Long number) {
 		String num = number.toString();
-		Pattern p = Pattern.compile("(0/91)?[7-9][0-9]{9}");
+		Pattern p = Pattern.compile("^[0-9]{10}$");
 		Matcher m = p.matcher(num);
 		return (m.find() && m.group().equals(num));
 	}
@@ -119,14 +156,6 @@ public class MortgageServiceImpl implements MortgageService {
 			result = true;
 		}
 		return result;
-	}
-	public static boolean validateLetters(String firstName) {
-
-	    String regx = "^[\\p{L} .'-]+$";
-	    Pattern pattern = Pattern.compile(regx,Pattern.CASE_INSENSITIVE);
-	    Matcher matcher = pattern.matcher(firstName);
-	    return matcher.find();
-
 	}
 
 	public String generatePassword() {
